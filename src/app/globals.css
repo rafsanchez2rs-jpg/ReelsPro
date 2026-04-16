@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f8ff;
+  --foreground: #141826;
+  --surface: #ffffff;
+  --brand: #0057ff;
+  --brand-600: #0046cc;
+  --muted: #5f6b85;
+  --border: #d7deee;
+  --success: #0f9b5f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at 20% 20%, #ebf1ff 0%, #f7f9ff 35%, #f8fbff 100%);
+  color: var(--foreground);
+  font-family: "Segoe UI", "Aptos", "Helvetica Neue", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
