@@ -10,7 +10,6 @@ import {
   type ReelEditorActionState,
   type ReelGenerationActionState
 } from "@/actions/reels.actions";
-import { PublishControls } from "@/components/reels/publish-controls";
 import { ReelEditorTimeline, type OverlayDraft } from "@/components/reels/reel-editor-timeline";
 import { UploadDropzone } from "@/components/reels/upload-dropzone";
 import { ReelPreview } from "@/components/reels/reel-preview";
@@ -23,20 +22,11 @@ import { Textarea } from "@/components/ui/textarea";
 const EMPTY_EDITOR_STATE: ReelEditorActionState = REEL_EDITOR_INITIAL_STATE;
 
 export function ReelGeneratorPanel() {
-  const [state, formAction, isPending] = useActionState<ReelGenerationActionState, FormData>(
-    createReelFromUploadAction,
-    REEL_GENERATION_INITIAL_STATE
-  );
-
-  const [saveState, saveAction, savePending] = useActionState<ReelEditorActionState, FormData>(
-    saveReelDraftAction,
-    EMPTY_EDITOR_STATE
-  );
-
-  const [renderState, renderAction, renderPending] = useActionState<ReelEditorActionState, FormData>(
-    renderReelAssetsAction,
-    EMPTY_EDITOR_STATE
-  );
+   const [state, formAction, isPending] = useActionState<ReelGenerationActionState, FormData>(
+     createReelFromUploadAction,
+     REEL_GENERATION_INITIAL_STATE
+   );
+ 
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [hookText, setHookText] = useState("");
@@ -213,9 +203,9 @@ export function ReelGeneratorPanel() {
         ) : null}
 
         {state.reelId && state.draft ? <PublishControls reelId={state.reelId} suggestedCaption={state.draft.caption} /> : null}
-      </Card>
+       </Card>
 
-      <div className="space-y-4">
+       <div className="space-y-4">
         <ReelPreview
           imageUrl={state.imageUrl}
           hookText={preview.hookText}
