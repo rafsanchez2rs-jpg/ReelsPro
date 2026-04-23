@@ -63,11 +63,10 @@ export function ReelGeneratorPanel() {
 
   const isEditorReady = Boolean(state.reelId && state.draft);
 
-  // handleSubmit wrapper para adaptar o onSubmit do form ao que o hook espera
-  const handleSubmit = (e: any) => {
+  // handleSubmit: transforma o evento em FormData e chama o formAction
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget as HTMLFormElement);
-    // formAction espera um FormData; caste para evitar conflitos de TS
+    const fd = new FormData(e.currentTarget);
     formAction(fd as unknown as FormData);
   };
 
@@ -142,10 +141,9 @@ export function ReelGeneratorPanel() {
 
             <ReelEditorTimeline overlays={overlays} onChange={setOverlays} />
 
-            <form /* espaço para salvar ou renderizar pode ficar aqui, se quiser manter */ className="space-y-2">
-              {/* Este formulário pode ser expandido para salvar/render com actions específicas se necessário */}
+            <form onSubmit={/* você pode conectar save/render se quiser */ (e) => e.preventDefault()} className="space-y-2">
+              {/* Espaço para ações adicionais, se necessário */}
             </form>
-
           </div>
         ) : null}
       </Card>
