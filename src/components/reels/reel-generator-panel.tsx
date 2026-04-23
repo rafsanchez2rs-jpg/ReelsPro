@@ -16,8 +16,8 @@ import { ReelPreview } from "@/components/reels/reel-preview";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label;
+import { Textarea } from "@/components/ui/textarea;
 
 const EMPTY_EDITOR_STATE: ReelEditorActionState = REEL_EDITOR_INITIAL_STATE;
 
@@ -63,7 +63,7 @@ export function ReelGeneratorPanel() {
 
   const isEditorReady = Boolean(state.reelId && state.draft);
 
-  // handleSubmit: transforma o evento em FormData e chama o formAction
+  // handleSubmit: converte o evento em FormData e chama o formAction
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -141,15 +141,23 @@ export function ReelGeneratorPanel() {
 
             <ReelEditorTimeline overlays={overlays} onChange={setOverlays} />
 
-            <form onSubmit={/* você pode conectar save/render se quiser */ (e) => e.preventDefault()} className="space-y-2">
-              {/* Espaço para ações adicionais, se necessário */}
-            </form>
+            {/* Espaço reservado para ações de salvar/renderizar caso queira expandir posteriormente */}
           </div>
         ) : null}
       </Card>
 
       <div className="space-y-4">
-        <ReelPreview imageUrl={state.imageUrl} hookText={preview.hookText} caption={preview.caption} thumbnailHeadline={preview.thumbnailHeadline} overlays={preview.overlays} />
+        <ReelPreview
+          thumbnailUrl={state.imageUrl}
+          hookText={preview.hookText}
+          caption={preview.caption}
+          thumbnailHeadline={preview.thumbnailHeadline}
+          overlays={overlays.map(o => ({
+            text: o.text,
+            startMs: o.startMs,
+            endMs: o.endMs
+          }))}
+        />
 
         <Card>
           <h3 className="text-sm font-semibold text-slate-900">Dados extraidos</h3>
