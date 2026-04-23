@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface UploadDropzoneProps {
   onUpload: (file: File) => void;
+  onFileChange?: (file: File) => void;
   accept?: string;
   maxSize?: number;
   disabled?: boolean;
@@ -12,6 +13,7 @@ interface UploadDropzoneProps {
 
 export function UploadDropzone({
   onUpload,
+  onFileChange,
   accept = "image/*",
   maxSize = 10 * 1024 * 1024,
   disabled = false
@@ -40,7 +42,10 @@ export function UploadDropzone({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) validateAndUpload(file);
+    if (file) {
+      if (onFileChange) onFileChange(file);
+      validateAndUpload(file);
+    }
   };
 
   const validateAndUpload = (file: File) => {
