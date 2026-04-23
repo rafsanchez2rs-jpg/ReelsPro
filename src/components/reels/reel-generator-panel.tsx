@@ -75,7 +75,12 @@ export function ReelGeneratorPanel() {
         </div>
 
         <form action={formAction} className="space-y-4">
-          <UploadDropzone onFileChange={setSelectedFile} disabled={isPending} />
+          <UploadDropzone
+            onFileChange={(payload: any) =>
+              setSelectedFile((prev: File | null) => (typeof payload === "function" ? payload(prev) : (payload as File | null)))
+            }
+            disabled={isPending}
+          />
 
           <Button type="submit" disabled={isPending || !selectedFile}>
             {isPending ? "Gerando draft..." : "Gerar Reel"}
