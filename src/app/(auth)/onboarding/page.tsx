@@ -31,7 +31,7 @@ export default function OnboardingPage() {
   const handleStepChange = async (step: number) => {
     setLoading(true);
     try {
-      await saveOnboardingProgress("demo-user", step, stepData);
+      await saveOnboardingProgress("demo-user", step, stepData as Record<string, unknown>);
       setCurrentStep(step);
     } catch (error) {
       console.error("Erro ao salvar progresso:", error);
