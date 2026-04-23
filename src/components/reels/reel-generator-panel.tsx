@@ -63,6 +63,14 @@ export function ReelGeneratorPanel() {
 
   const isEditorReady = Boolean(state.reelId && state.draft);
 
+  // handleSubmit wrapper para adaptar o onSubmit do form ao que o hook espera
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget as HTMLFormElement);
+    // formAction espera um FormData; caste para evitar conflitos de TS
+    formAction(fd as unknown as FormData);
+  };
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
       <Card className="space-y-5">
@@ -73,13 +81,13 @@ export function ReelGeneratorPanel() {
           </p>
         </div>
 
-        <form onSubmit={formAction} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <UploadDropzone
             onFileChange={(payload: any) =>
               setSelectedFile((prev: File | null) => (typeof payload === "function" ? payload(prev) : (payload as File | null)))
             }
             onUpload={() => {
-              // noop durante a geração de draft; o upload real acontece ao submeter o formulário
+              // noop durante a geração de draft; o upload real ocorre ao submeter o formulário
             }}
             disabled={isPending}
           />
@@ -134,7 +142,9 @@ export function ReelGeneratorPanel() {
 
             <ReelEditorTimeline overlays={overlays} onChange={setOverlays} />
 
-            {/* Nível básico: salvar e renderizar podem ser adicionados aqui se necessários */}
+            <form /* espaço para salvar ou renderizar pode ficar aqui, se quiser manter */ className="space-y-2">
+              {/* Este formulário pode ser expandido para salvar/render com actions específicas se necessário */}
+            </form>
 
           </div>
         ) : null}
