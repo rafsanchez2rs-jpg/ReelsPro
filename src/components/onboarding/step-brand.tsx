@@ -1,81 +1,78 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { brandingStepSchema } from "@/lib/validation/onboarding.schema";
-import { FieldError, StepShell } from "@/components/onboarding/step-shell";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
-type BrandingValues = {
-  primaryColor: string;
-  secondaryColor: string;
-  visualStyle: string;
-  ctaStyle: string;
-};
-
-interface StepBrandProps {
-  defaultValues?: Partial<BrandingValues>;
-  pending: boolean;
-  onBack: () => void;
-  onNext: (values: BrandingValues) => void;
+interface BrandData {
+  brandName: string;
+  brandColor: string;
+  accentPhrase: string;
 }
 
-export function StepBrand({ defaultValues, pending, onBack, onNext }: StepBrandProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<BrandingValues>({
-    resolver: zodResolver(brandingStepSchema),
-    defaultValues: {
-      primaryColor: defaultValues?.primaryColor ?? "#0057FF",
-      secondaryColor: defaultValues?.secondaryColor ?? "#FF7A00",
-      visualStyle: defaultValues?.visualStyle ?? "Vitrine premium com textos objetivos",
-      ctaStyle: defaultValues?.ctaStyle ?? "Compre agora com desconto"
-    }
-  });
+interface StepBrandProps {
+  onNext: (data: BrandData) => void;
+  onBack: () => void;
+  initialData?: BrandData;
+}
+
+export function StepBrand({ onNext, onBack, initialData }: StepBrandProps) {
+  const [brandName, setBrandName] = useState(initialData?.brandName || "");
+  const [brandColor, setBrandColor] = useState(initialData?.brandColor || "#E1306C");
+  const [accentPhrase, setAccentPhrase] = useState(initialData?.accentPhrase || "");
 
   return (
-    <form onSubmit={handleSubmit(onNext)}>
-      <StepShell title="Identidade Visual" description="Ajuste estilo para capas e overlays dos reels.">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <Label htmlFor="primaryColor">Cor primaria</Label>
-            <Input id="primaryColor" {...register("primaryColor")} />
-            <FieldError message={errors.primaryColor?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="secondaryColor">Cor secundaria</Label>
-            <Input id="secondaryColor" {...register("secondaryColor")} />
-            <FieldError message={errors.secondaryColor?.message} />
-          </div>
-
-          <div className="md:col-span-2">
-            <Label htmlFor="visualStyle">Estilo visual</Label>
-            <Textarea id="visualStyle" {...register("visualStyle")} />
-            <FieldError message={errors.visualStyle?.message} />
-          </div>
-
-          <div className="md:col-span-2">
-            <Label htmlFor="ctaStyle">Assinatura de CTA</Label>
-            <Input id="ctaStyle" {...register("ctaStyle")} />
-            <FieldError message={errors.ctaStyle?.message} />
-          </div>
-
-          <div className="flex gap-2 pt-2 md:col-span-2">
-            <Button type="button" variant="outline" onClick={onBack} disabled={pending}>
-              Voltar
-            </Button>
-            <Button type="submit" disabled={pending}>
-              Continuar
-            </Button>
+    <Card>
+      <CardHeader>
+        <CardTitle>Personalize sua Marca</CardTitle>
+        <CardDescription>Adicione identity visual aos seus Reels</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <label className="mb-1 block text-sm font-medium">Nome da sua marca</label>
+          <Input
+            placeholder="Minha Loja"
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium">Cor principal</label>
+          <div className="flex gap-2">
+            <input
+              type="color"
+              value={brandColor}
+              onChange={(e) => setBrandColor(e.target.value)}
+              className="h-10 w-14 cursor-pointer rounded border border-[var(--color-border)]"
+            />
+            <Input
+              value={brandColor}
+              onChange={(e) => setBrandColor(e.target.value)}
+              className="flex-1"
+            />
           </div>
         </div>
-      </StepShell>
-    </form>
+        <div>
+          <label className="mb-1 block text-sm font-medium">Frase de impacto</label>
+          <Input
+            placeholder="O melhor preço você encontra aqui!"
+            value={accentPhrase}
+            onChange={(e) => setAccentPhrase(e.target.value)}
+          />
+          <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+            Frase que appears nos seus Reels
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onBack} className="flex-1">
+            Voltar
+          </Button>
+          <Button onClick={() => onNext({ brandName, brandColor, accentPhrase })} disabled={!brandName.trim()} className="flex-1">
+            Continuar
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

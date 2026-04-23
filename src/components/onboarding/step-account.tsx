@@ -1,73 +1,36 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { accountStepSchema } from "@/lib/validation/onboarding.schema";
-import { FieldError, StepShell } from "@/components/onboarding/step-shell";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-
-type AccountValues = {
-  businessName: string;
-  niche: string;
-  brandTone: string;
-};
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface StepAccountProps {
-  defaultValues?: Partial<AccountValues>;
-  pending: boolean;
-  onNext: (values: AccountValues) => void;
+  onNext: (data: { fullName: string }) => void;
 }
 
-export function StepAccount({ defaultValues, pending, onNext }: StepAccountProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<AccountValues>({
-    resolver: zodResolver(accountStepSchema),
-    defaultValues: {
-      businessName: defaultValues?.businessName ?? "",
-      niche: defaultValues?.niche ?? "",
-      brandTone: defaultValues?.brandTone ?? ""
-    }
-  });
+export function StepAccount({ onNext }: StepAccountProps) {
+  const [fullName, setFullName] = useState("");
 
   return (
-    <form onSubmit={handleSubmit(onNext)}>
-      <StepShell title="Conta e Posicionamento" description="Conte quem voce e para personalizarmos cada roteiro.">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="businessName">Nome da loja</Label>
-            <Input id="businessName" {...register("businessName")} placeholder="Ex.: Casa Premium Shopee" />
-            <FieldError message={errors.businessName?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="niche">Nicho principal</Label>
-            <Input id="niche" {...register("niche")} placeholder="Ex.: Casa e cozinha" />
-            <FieldError message={errors.niche?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="brandTone">Tom da comunicacao</Label>
-            <Textarea
-              id="brandTone"
-              {...register("brandTone")}
-              placeholder="Ex.: Direto, amigavel e orientado a conversao"
-            />
-            <FieldError message={errors.brandTone?.message} />
-          </div>
-
-          <div className="pt-2">
-            <Button type="submit" disabled={pending}>
-              Continuar
-            </Button>
-          </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Bem-vindo ao ReelFlow!</CardTitle>
+        <CardDescription>Vamos configurar sua conta para começar</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <label className="mb-1 block text-sm font-medium">Seu nome</label>
+          <Input
+            placeholder="Seu nome completo"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
         </div>
-      </StepShell>
-    </form>
+        <Button onClick={() => onNext({ fullName })} disabled={!fullName.trim()} className="w-full">
+          Continuar
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

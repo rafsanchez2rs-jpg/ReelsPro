@@ -1,97 +1,113 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { UploadCloud } from "lucide-react";
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
 interface UploadDropzoneProps {
-  onFileChange: (file: File | null) => void;
+  onUpload: (file: File) => void;
+  accept?: string;
+  maxSize?: number;
   disabled?: boolean;
 }
 
-export function UploadDropzone({ onFileChange, disabled = false }: UploadDropzoneProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
+export function UploadDropzone({
+  onUpload,
+  accept = "image/*",
+  maxSize = 10 * 1024 * 1024,
+  disabled = false
+}: UploadDropzoneProps) {
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [preview, setPreview] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const acceptLabel = useMemo(() => "JPG, PNG ou WEBP ate 10MB", []);
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!disabled) setIsDragging(true);
+  };
 
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
 
-  const handleFile = (file: File | null) => {
-    onFileChange(file);
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (disabled) return;
 
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
+    const file = e.dataTransfer.files[0];
+    validateAndUpload(file);
+  };
 
-    if (!file) {
-      setPreviewUrl(null);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) validateAndUpload(file);
+  };
+
+  const validateAndUpload = (file: File) => {
+    setError(null);
+
+    if (!file.type.startsWith("image/")) {
+      setError("Por favor, envie uma imagem (PNG, JPG ou WebP)");
       return;
     }
 
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
+    if (file.size > maxSize) {
+      setError(`Tamanho máximo: ${Math.round(maxSize / 1024 / 1024)}MB`);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => setPreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+
+    onUpload(file);
   };
 
+  if (preview) {
+    return (
+      <div className="relative aspect-[9/16] w-full overflow-hidden rounded-xl bg-black">
+        <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+        <button
+          onClick={() => setPreview(null)}
+          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-sm font-medium"
+        >
+          ✕
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-3">
-      <label
-        onDragOver={(event) => {
-          event.preventDefault();
-          setIsDragOver(true);
-        }}
-        onDragLeave={() => setIsDragOver(false)}
-        onDrop={(event) => {
-          event.preventDefault();
-          setIsDragOver(false);
-          const file = event.dataTransfer.files?.[0] ?? null;
-
-          if (inputRef.current && file) {
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            inputRef.current.files = dataTransfer.files;
-          }
-
-          handleFile(file);
-        }}
-        className={cn(
-          "group flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center transition",
-          isDragOver && "border-[var(--brand)] bg-blue-50",
-          disabled && "cursor-not-allowed opacity-70"
-        )}
-      >
-        <UploadCloud className="mb-3 size-8 text-slate-500" />
-        <p className="text-sm font-semibold text-slate-800">Arraste seu print/foto da Shopee aqui</p>
-        <p className="mt-1 text-xs text-slate-500">ou clique para selecionar</p>
-        <p className="mt-2 text-xs text-slate-400">{acceptLabel}</p>
-
-        <input
-          ref={inputRef}
-          disabled={disabled}
-          type="file"
-          name="productFile"
-          className="hidden"
-          accept="image/png,image/jpeg,image/webp"
-          onChange={(event) => {
-            const file = event.target.files?.[0] ?? null;
-            handleFile(file);
-          }}
-        />
-      </label>
-
-      {previewUrl ? (
-        <div className="overflow-hidden rounded-xl border border-slate-200">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={previewUrl} alt="Preview do produto" className="h-52 w-full object-cover" />
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={cn(
+        "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition",
+        isDragging
+          ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+          : "border-[var(--color-border)] hover:border-[var(--color-primary)]/50",
+        disabled && "cursor-not-allowed opacity-50"
+      )}
+    >
+      <input
+        type="file"
+        accept={accept}
+        onChange={handleFileChange}
+        disabled={disabled}
+        className="hidden"
+        id="file-upload"
+      />
+      <label htmlFor="file-upload" className="flex flex-col items-center gap-2 cursor-pointer">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-muted)]">
+          <svg className="h-6 w-6 text-[var(--color-muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
         </div>
-      ) : null}
+        <p className="text-sm font-medium">Arraste ou clique para enviar</p>
+        <p className="text-xs text-[var(--color-muted-foreground)]">PNG, JPG ou WebP (max 10MB)</p>
+      </label>
+      {error && <p className="mt-2 text-sm text-[var(--color-destructive)]">{error}</p>}
     </div>
   );
 }

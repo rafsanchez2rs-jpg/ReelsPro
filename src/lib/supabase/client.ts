@@ -1,6 +1,6 @@
-import { createBrowserClient } from "@supabase/ssr";
-import { clientEnv } from "@/lib/env";
+import { createClient } from "@supabase/supabase-js";
+import { clientEnv } from "./env";
 
-export function createClient() {
-  return createBrowserClient(clientEnv.NEXT_PUBLIC_SUPABASE_URL, clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+export function createSupabaseClient() {
+  return createClient(clientEnv.NEXT_PUBLIC_SUPABASE_URL, clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }

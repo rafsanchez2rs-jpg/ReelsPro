@@ -1,64 +1,71 @@
 "use client";
 
-interface OverlayPreview {
-  sequence: number;
-  text: string;
-  animation: string;
-  startMs: number;
-  endMs: number;
-}
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface ReelPreviewProps {
-  imageUrl?: string;
-  hookText: string;
-  caption: string;
-  thumbnailHeadline: string;
-  overlays: OverlayPreview[];
+  hookText?: string;
+  caption?: string;
+  thumbnailUrl?: string;
+  videoUrl?: string;
+  overlays?: Array<{ text: string; startMs: number; endMs: number }>;
 }
 
-export function ReelPreview({ imageUrl, hookText, caption, thumbnailHeadline, overlays }: ReelPreviewProps) {
-  const visibleOverlays = overlays.slice(0, 4);
+export function ReelPreview({
+  hookText = "Olha só esse produto!",
+  caption,
+  thumbnailUrl,
+  videoUrl,
+  overlays = []
+}: ReelPreviewProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <div className="space-y-3">
-      <div className="rounded-2xl border border-slate-200 bg-white p-3">
-        <div className="mx-auto aspect-[9/16] w-full max-w-[300px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-900">
-          <div className="relative h-full w-full">
-            {imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={imageUrl} alt="Produto" className="h-full w-full object-cover opacity-80" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-slate-800 text-xs text-slate-300">
-                Preview aparecera aqui
-              </div>
-            )}
+    <div className="relative aspect-[9/16] w-full max-w-[280px] overflow-hidden rounded-xl bg-black mx-auto">
+      {thumbnailUrl && !isPlaying && (
+        <img src={thumbnailUrl} alt="Thumbnail" className="h-full w-full object-cover" />
+      )}
 
-            <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/5 to-black/55" />
+      {videoUrl && (
+        <video
+          src={videoUrl}
+          className="h-full w-full object-cover"
+          paused={!isPlaying}
+          onPlay={() => setIsPlaying(true)}
+          onEnded={() => setIsPlaying(false)}
+          controls={false}
+        />
+      )}
 
-            <div className="absolute left-3 right-3 top-3 rounded-lg bg-black/60 px-2 py-1.5 text-center text-[11px] font-semibold text-white">
-              {thumbnailHeadline || "Capa do Reel"}
-            </div>
-
-            <div className="absolute left-3 right-3 bottom-4 space-y-1.5">
-              {visibleOverlays.map((overlay) => (
-                <div
-                  key={overlay.sequence}
-                  className="rounded-md bg-white/90 px-2 py-1 text-[11px] font-bold text-slate-900 shadow-sm"
-                >
-                  {overlay.text}
-                </div>
-              ))}
-            </div>
-          </div>
+      {isPlaying && overlays.map((overlay, idx) => (
+        <div
+          key={idx}
+          className="absolute left-1/2 -translate-x-1/2 text-white text-center px-4 py-2 bg-black/50 rounded-lg"
+          style={{ bottom: `${20 + idx * 15}%` }}
+        >
+          <p className="text-lg font-bold">{overlay.text}</p>
         </div>
-      </div>
+      ))}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hook</p>
-        <p className="mt-1 text-sm font-semibold text-slate-900">{hookText || "Hook do video"}</p>
+      {!isPlaying && hookText && (
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-center px-4">
+          <p className="text-xl font-bold text-white drop-shadow-lg">{hookText}</p>
+        </div>
+      )}
 
-        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Legenda</p>
-        <p className="mt-1 line-clamp-3 text-sm text-slate-700">{caption || "Legenda do post"}</p>
+      {caption && (
+        <div className="absolute bottom-4 left-0 right-0 px-4">
+          <p className="text-xs text-white/80 text-center line-clamp-2">{caption}</p>
+        </div>
+      )}
+
+      <div className="absolute right-2 bottom-20 flex flex-col items-center gap-4">
+        <button
+          onClick={() => !isPlaying && videoUrl && setIsPlaying(true)}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white"
+        >
+          {isPlaying ? "⏸" : "▶"}
+        </button>
       </div>
     </div>
   );

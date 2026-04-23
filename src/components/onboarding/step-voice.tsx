@@ -1,88 +1,74 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { voiceStepSchema } from "@/lib/validation/onboarding.schema";
-import { FieldError, StepShell } from "@/components/onboarding/step-shell";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-type VoiceValues = {
-  provider: "elevenlabs" | "cartesia";
-  voiceId: string;
-  narrationStyle: string;
-  narrationSpeed: number;
-};
-
-interface StepVoiceProps {
-  defaultValues?: Partial<VoiceValues>;
-  pending: boolean;
-  onBack: () => void;
-  onNext: (values: VoiceValues) => void;
+interface VoiceData {
+  mode: "text" | "elevenlabs" | "cartesia";
+  voiceId?: string;
 }
 
-export function StepVoice({ defaultValues, pending, onBack, onNext }: StepVoiceProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<VoiceValues>({
-    resolver: zodResolver(voiceStepSchema),
-    defaultValues: {
-      provider: defaultValues?.provider ?? "elevenlabs",
-      voiceId: defaultValues?.voiceId ?? "pt-br-feminina-comercial-01",
-      narrationStyle: defaultValues?.narrationStyle ?? "Energetica e confiavel",
-      narrationSpeed: defaultValues?.narrationSpeed ?? 1
-    }
-  });
+interface StepVoiceProps {
+  onNext: (data: VoiceData) => void;
+  onBack: () => void;
+  initialData?: VoiceData;
+}
+
+const VOICE_OPTIONS = [
+  { id: "text", label: "Sem voz (só texto)", description: "Reels com legendas animadas", free: true },
+  { id: "elevenlabs", label: "ElevenLabs (Premium)", description: "Voz realista em português", free: false },
+  { id: "cartesia", label: "Cartesia (Premium)", description: "Voz natural e expressiva", free: false }
+];
+
+export function StepVoice({ onNext, onBack, initialData }: StepVoiceProps) {
+  const [mode, setMode] = useState<VoiceData["mode"]>(initialData?.mode || "text");
 
   return (
-    <form onSubmit={handleSubmit(onNext)}>
-      <StepShell title="Voz e Narracao" description="Defina a experiencia de audio padrao dos reels.">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="provider">Provedor de voz</Label>
-            <select
-              id="provider"
-              {...register("provider")}
-              className="h-10 w-full rounded-lg border border-[var(--border)] bg-white px-3 text-sm outline-none ring-[var(--brand)] focus:ring-2"
+    <Card>
+      <CardHeader>
+        <CardTitle>Escolha a Voz</CardTitle>
+        <CardDescription>Como deseja a narração dos seus Reels?</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          {VOICE_OPTIONS.map((voice) => (
+            <button
+              key={voice.id}
+              onClick={() => setMode(voice.id as VoiceData["mode"])}
+              disabled={!voice.free}
+              className={`w-full rounded-lg border p-4 text-left transition ${
+                mode === voice.id
+                  ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                  : "border-[var(--color-border)] hover:border-[var(--color-primary)]/50"
+              } ${!voice.free ? "opacity-60" : ""}`}
             >
-              <option value="elevenlabs">ElevenLabs</option>
-              <option value="cartesia">Cartesia</option>
-            </select>
-            <FieldError message={errors.provider?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="voiceId">ID da voz</Label>
-            <Input id="voiceId" {...register("voiceId")} />
-            <FieldError message={errors.voiceId?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="narrationStyle">Estilo de narracao</Label>
-            <Textarea id="narrationStyle" {...register("narrationStyle")} />
-            <FieldError message={errors.narrationStyle?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="narrationSpeed">Velocidade da fala (0.7 a 1.4)</Label>
-            <Input id="narrationSpeed" type="number" step="0.1" {...register("narrationSpeed", { valueAsNumber: true })} />
-            <FieldError message={errors.narrationSpeed?.message} />
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onBack} disabled={pending}>
-              Voltar
-            </Button>
-            <Button type="submit" disabled={pending}>
-              Continuar
-            </Button>
-          </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">{voice.label}</p>
+                  <p className="text-sm text-[var(--color-muted-foreground)]">{voice.description}</p>
+                </div>
+                {voice.free ? (
+                  <span className="rounded-full bg-[var(--color-success)] px-2 py-0.5 text-xs text-white">Grátis</span>
+                ) : (
+                  <span className="rounded-full bg-[var(--color-muted)] px-2 py-0.5 text-xs text-[var(--color-muted-foreground)]">Premium</span>
+                )}
+              </div>
+            </button>
+          ))}
         </div>
-      </StepShell>
-    </form>
+        <p className="text-sm text-[var(--color-muted-foreground)]">
+          Adicione chaves de API nas configurações para ativar vozes premium.
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onBack} className="flex-1">
+            Voltar
+          </Button>
+          <Button onClick={() => onNext({ mode })} className="flex-1">
+            Continuar
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
