@@ -19,17 +19,26 @@ export type ReelGenerationActionState = {
 export const REEL_EDITOR_INITIAL_STATE: ReelEditorActionState = {};
 export const REEL_GENERATION_INITIAL_STATE: ReelGenerationActionState = {};
 
-export async function createReelFromUploadAction(_payload: FormData): Promise<void> {
-  // no-op stub for deployment
-  return;
+export async function createReelFromUploadAction(
+  state: ReelGenerationActionState,
+  _payload: FormData
+): Promise<ReelGenerationActionState> {
+  // no-op: preserve state for deployment
+  return { ...state };
 }
 
-export async function renderReelAssetsAction(_payload: FormData): Promise<void> {
-  // no-op stub for deployment
-  return;
+export async function renderReelAssetsAction(
+  state: ReelEditorActionState,
+  _payload: FormData
+): Promise<ReelEditorActionState> {
+  // no-op: preserve state for deployment
+  return { ...state };
 }
 
-export async function saveReelDraftAction(_payload: FormData): Promise<void> {
-  // no-op stub for deployment
-  return;
+export async function saveReelDraftAction(
+  state: ReelEditorActionState,
+  _payload: FormData
+): Promise<ReelEditorActionState> {
+  // no-op: preserve state for deployment
+  return { ...state };
 }
