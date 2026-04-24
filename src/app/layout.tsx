@@ -1,5 +1,3 @@
-"use client";
-
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { Providers } from "./providers";
