@@ -30,7 +30,6 @@ export function ReelPreview({
         <video
           src={videoUrl}
           className="h-full w-full object-cover"
-          paused={!isPlaying}
           onPlay={() => setIsPlaying(true)}
           onEnded={() => setIsPlaying(false)}
           controls={false}
