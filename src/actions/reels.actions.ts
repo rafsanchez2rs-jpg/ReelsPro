@@ -12,8 +12,16 @@ export type ReelGenerationActionState = {
   reelId?: string;
   draft?: any;
   imageUrl?: string;
+  videoSignedUrl?: string;
   message?: string;
   success?: boolean;
+  analysis?: {
+    productName: string;
+    price: number;
+    description: string;
+    benefits: string[];
+    confidence: number;
+  };
 };
 
 export const REEL_EDITOR_INITIAL_STATE: ReelEditorActionState = {};
