@@ -29,6 +29,7 @@ export function ReelGeneratorPanel() {
   const [hookText, setHookText] = useState("");
   const [caption, setCaption] = useState("");
   const [narrationScript, setNarrationScript] = useState("");
+  const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
   const [thumbnailHeadline, setThumbnailHeadline] = useState("");
   const [overlays, setOverlays] = useState<OverlayDraft[]>([]);
 
@@ -38,7 +39,7 @@ export function ReelGeneratorPanel() {
     setCaption(state.draft.caption);
     setNarrationScript(state.draft.narrationScript);
     setThumbnailHeadline(state.draft.thumbnailHeadline);
-    setOverlays(state.draft.overlays);
+    // overlays do state.draft
   }, [state.draft]);
 
   const overlaysJson = useMemo(() => JSON.stringify(overlays), [overlays]);
@@ -65,9 +66,7 @@ export function ReelGeneratorPanel() {
       <Card className="space-y-5">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Upload e Geracao</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Envie um print da Shopee e gere automaticamente thumbnail, overlays e roteiro.
-          </p>
+          <p className="mt-1 text-sm text-slate-600">Envie um print da Shopee e gere automaticamente thumbnail, overlays e roteiro.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -78,15 +77,11 @@ export function ReelGeneratorPanel() {
             onUpload={() => {}}
             disabled={isPending}
           />
-          <Button type="submit" disabled={isPending || !selectedFile}>
-            {isPending ? "Gerando..." : "Gerar Reel"}
-          </Button>
+          <Button type="submit" disabled={isPending || !selectedFile}>Gerar Reel</Button>
         </form>
 
         {state.message && (
-          <div className={state.success ? "text-green-600" : "text-red-600"}>
-            {state.message}
-          </div>
+          <div className={state.success ? "text-green-600" : "text-red-600"}>{state.message}</div>
         )}
 
         {isEditorReady && (
@@ -116,9 +111,9 @@ export function ReelGeneratorPanel() {
       <div className="space-y-4">
         <ReelPreview
           thumbnailUrl={state.imageUrl}
-          hookText={preview.hookText}
-          caption={preview.caption}
-          videoUrl={state.videoSignedUrl ?? state.videoUrl ?? undefined}
+          hookText={hookText}
+          caption={caption}
+          videoUrl={videoUrl}
           overlays={overlays.map((o) => ({ text: o.text, startMs: o.startMs, endMs: o.endMs }))}
         />
         <Card>
@@ -126,8 +121,8 @@ export function ReelGeneratorPanel() {
           {state.analysis ? (
             <div className="text-sm mt-2">
               <p>Produto: {state.analysis.productName}</p>
-              <p>Preco: R$ {state.analysis.price.toFixed(2).replace(".", ",")}</p>
-              <p>Descricao: {state.analysis.description}</p>
+              <p>Preço: {state.analysis.productPrice}</p>
+              <p>Descrição: {state.analysis.shortDescription}</p>
             </div>
           ) : (
             <p className="text-sm text-gray-500 mt-2">Aguardando upload...</p>

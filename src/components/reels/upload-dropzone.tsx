@@ -1,16 +1,14 @@
 "use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
 interface UploadDropzoneProps {
-  onUpload: (file: File) => void;
-  onFileChange?: (payload: React.SetStateAction<File | null>) => void;
+  onUpload: (payload: File) => void;
+  onFileChange?: (payload: any) => void;
   accept?: string;
   maxSize?: number;
   disabled?: boolean;
 }
-
 export function UploadDropzone({
   onUpload,
   onFileChange,
@@ -43,7 +41,7 @@ export function UploadDropzone({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (onFileChange) onFileChange(file as unknown as React.SetStateAction<File | null>);
+      if (onFileChange) onFileChange(file);
       validateAndUpload(file);
     }
   };
@@ -105,7 +103,7 @@ export function UploadDropzone({
       />
       <label htmlFor="file-upload" className="flex flex-col items-center gap-2 cursor-pointer">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-muted)]">
-          <svg className="h-6 w-6 text-[var(--color-muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-6 h-6 text-[var(--color-muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
         </div>

@@ -27,14 +27,14 @@ export function ReelPreview({
       )}
 
       {videoUrl && (
-        <video
-          src={videoUrl}
-          className="h-full w-full object-cover"
-          onPlay={() => setIsPlaying(true)}
-          onEnded={() => setIsPlaying(false)}
-          controls={false}
-        />
-      )}
+  <video
+    src={videoUrl}
+    className="h-full w-full object-cover"
+    onPlay={() => setIsPlaying(true)}
+    onEnded={() => setIsPlaying(false)}
+    controls={false}
+  />
+)}
 
       {isPlaying && overlays.map((overlay, idx) => (
         <div

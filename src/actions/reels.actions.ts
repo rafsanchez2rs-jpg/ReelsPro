@@ -1,11 +1,20 @@
-// Minimal stubs to satisfy deployment/build when full business logic is not required.
-
+// Conteúdo consolidado com campos adicionais para vídeo e análise
 export type ReelEditorActionState = {
   reelId?: string;
   draft?: any;
   imageUrl?: string;
   message?: string;
   success?: boolean;
+  // novas props para compatibilidade
+  videoUrl?: string;
+  videoSignedUrl?: string;
+  analysis?: {
+    productName: string;
+    productPrice: number;
+    shortDescription: string;
+    benefits: string[];
+    confidence?: number;
+  };
 };
 
 export type ReelGenerationActionState = {
@@ -14,14 +23,15 @@ export type ReelGenerationActionState = {
   imageUrl?: string;
   videoSignedUrl?: string;
   videoUrl?: string;
+  videoUrl?: string;
   message?: string;
   success?: boolean;
   analysis?: {
     productName: string;
-    price: number;
-    description: string;
+    productPrice: number;
+    shortDescription: string;
     benefits: string[];
-    confidence: number;
+    confidence?: number;
   };
 };
 
@@ -32,7 +42,6 @@ export async function createReelFromUploadAction(
   state: ReelGenerationActionState,
   _payload: FormData
 ): Promise<ReelGenerationActionState> {
-  // no-op: preserve state for deployment
   return { ...state };
 }
 
@@ -40,7 +49,6 @@ export async function renderReelAssetsAction(
   state: ReelEditorActionState,
   _payload: FormData
 ): Promise<ReelEditorActionState> {
-  // no-op: preserve state for deployment
   return { ...state };
 }
 
@@ -48,6 +56,5 @@ export async function saveReelDraftAction(
   state: ReelEditorActionState,
   _payload: FormData
 ): Promise<ReelEditorActionState> {
-  // no-op: preserve state for deployment
   return { ...state };
 }
