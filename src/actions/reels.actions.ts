@@ -13,6 +13,7 @@ export type ReelGenerationActionState = {
   draft?: any;
   imageUrl?: string;
   videoSignedUrl?: string;
+  videoUrl?: string;
   message?: string;
   success?: boolean;
   analysis?: {

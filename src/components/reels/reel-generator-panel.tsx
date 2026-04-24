@@ -118,7 +118,7 @@ export function ReelGeneratorPanel() {
           thumbnailUrl={state.imageUrl}
           hookText={preview.hookText}
           caption={preview.caption}
-          videoUrl={state.videoSignedUrl}
+          videoUrl={state.videoSignedUrl ?? state.videoUrl ?? undefined}
           overlays={overlays.map((o) => ({ text: o.text, startMs: o.startMs, endMs: o.endMs }))}
         />
         <Card>
