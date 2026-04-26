@@ -5,7 +5,13 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "10mb"
     }
-  }
+  },
+  serverExternalPackages: [
+    "@remotion/bundler",
+    "@remotion/renderer",
+    "@remotion/cli",
+    "esbuild"
+  ]
 };
 
 export default nextConfig;
