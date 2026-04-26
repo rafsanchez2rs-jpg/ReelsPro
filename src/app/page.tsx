@@ -9,37 +9,88 @@ import { Progress } from "@/components/ui/progress";
 
 type GenerationStatus = "idle" | "uploading" | "analyzing" | "generating" | "ready" | "error";
 
+interface ReelData {
+  hookText: string;
+  caption: string;
+  narration: string;
+  hashtags: string[];
+  thumbnailUrl: string;
+  videoUrl?: string;
+  analysis: {
+    productName: string;
+    productPrice: number;
+    shortDescription: string;
+    benefits: string[];
+  };
+}
+
 export default function HomePage() {
   const [status, setStatus] = useState<GenerationStatus>("idle");
   const [progress, setProgress] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [reelData, setReelData] = useState<ReelData | null>(null);
 
   const handleUpload = async (uploadedFile: File) => {
     setStatus("uploading");
     setProgress(10);
+    setReelData(null);
 
     const reader = new FileReader();
     reader.onload = (e) => setPreviewUrl(e.target?.result as string);
     reader.readAsDataURL(uploadedFile);
 
-    setTimeout(() => {
+    const imageUrl = await new Promise<string>((resolve) => {
+      const r = new FileReader();
+      r.onload = (e) => resolve(e.target?.result as string);
+      r.readAsDataURL(uploadedFile);
+    });
+
+    try {
       setStatus("analyzing");
       setProgress(30);
-      setTimeout(() => {
-        setStatus("generating");
-        setProgress(70);
-        setTimeout(() => {
-          setStatus("ready");
-          setProgress(100);
-        }, 2000);
-      }, 2000);
-    }, 1000);
+
+      const response = await fetch("/api/reels/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageUrl,
+          userId: "anonymous",
+        }),
+      });
+
+      setStatus("generating");
+      setProgress(70);
+
+      const data = await response.json();
+
+      if (data.success) {
+        setReelData(data.reel);
+        setStatus("ready");
+        setProgress(100);
+      } else {
+        console.error("API error:", data.error);
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+      setStatus("error");
+    }
   };
 
   const handleReset = () => {
     setStatus("idle");
     setProgress(0);
     setPreviewUrl(null);
+    setReelData(null);
+  };
+
+  const handleDownload = () => {
+    const downloadUrl = reelData?.videoUrl || reelData?.thumbnailUrl;
+    if (!downloadUrl) return;
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `reel-${Date.now()}.mp4`;
+    link.click();
   };
 
   return (
@@ -144,35 +195,94 @@ export default function HomePage() {
                   {status === "analyzing" && "🧠 Analisando..."}
                   {status === "generating" && "✨ Gerando Reel..."}
                   {status === "ready" && "🎉 Reel Pronto!"}
+                  {status === "error" && "❌ Erro"}
                 </h2>
                 
-                <Progress value={progress} className="mb-6 h-3" />
-                <p className="mb-6 text-center text-gray-600">{progress}%</p>
+                {status !== "error" && (
+                  <>
+                    <Progress value={progress} className="mb-6 h-3" />
+                    <p className="mb-6 text-center text-gray-600">{progress}%</p>
+                  </>
+                )}
 
-                {status === "ready" && (
+                {status === "error" && (
+                  <div className="text-center space-y-4 py-6">
+                    <p className="text-red-500 font-semibold">
+                      Erro ao gerar o reel. Tente novamente.
+                    </p>
+                    <Button onClick={handleReset} variant="outline">
+                      Tentar Novamente
+                    </Button>
+                  </div>
+                )}
+
+                {status === "ready" && reelData && (
                   <div className="space-y-6">
                     <div className="rounded-xl bg-gradient-to-br from-gray-50 to-pink-50 p-6">
                       <p className="font-semibold mb-2">Dados Extraídos:</p>
-                      <p className="text-sm">Produto: <strong>Smartphone Galaxy A54</strong></p>
-                      <p className="text-sm">Preço: <strong className="text-green-600">R$ 1.899,90</strong></p>
+                      <p className="text-sm">
+                        Produto: <strong>{reelData.analysis.productName}</strong>
+                      </p>
+                      <p className="text-sm">
+                        Preço:{" "}
+                        <strong className="text-green-600">
+                          {reelData.analysis.productPrice.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
+                        </strong>
+                      </p>
+                      <p className="text-sm mt-1">
+                        {reelData.analysis.shortDescription}
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 p-6 space-y-3">
+                      <p className="font-semibold">Roteiro Gerado:</p>
+                      <p className="text-sm">
+                        <span className="font-medium">Hook:</span> {reelData.hookText}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Caption:</span> {reelData.caption}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Narração:</span> {reelData.narration}
+                      </p>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {reelData.hashtags.map((tag, idx) => (
+                          <span
+                            key={idx}
+                            className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="flex gap-3">
                       <Button onClick={handleReset} variant="outline" className="flex-1">
                         Criar Outro
                       </Button>
-                      <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                      <Button
+                        onClick={handleDownload}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      >
                         ⬇️ Baixar Reel
                       </Button>
                     </div>
                   </div>
                 )}
 
-                {previewUrl && (
+                {previewUrl && status !== "error" && (
                   <div className="mt-8">
                     <h3 className="mb-4 text-lg font-bold">Preview</h3>
                     <div className="mx-auto max-w-[280px]">
-                      <ReelPreview thumbnailUrl={previewUrl} />
+                      <ReelPreview
+                        thumbnailUrl={reelData?.thumbnailUrl || previewUrl}
+                        hookText={reelData?.hookText}
+                        caption={reelData?.caption}
+                      />
                     </div>
                   </div>
                 )}
